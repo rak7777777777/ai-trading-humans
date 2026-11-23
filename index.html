@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070a12">
+  <meta name="description" content="A playful simulated leaderboard of public figures and AI traders. Entertainment only.">
+  <title>AI Trading Humans App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#070a12;--panel:#101623;--line:#242d3d;--muted:#8d98ad;--text:#f4f7ff;--mint:#68f0c4;--violet:#a998ff;--gold:#ffd77f;--sans:Manrope,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"DM Mono",ui-monospace,monospace}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}body{min-width:320px;background:radial-gradient(ellipse at 38% 47%,#16284a 0,transparent 42%),radial-gradient(ellipse at 100% 0,#2c1d492e,transparent 38%),var(--bg);color:var(--text);font:14px var(--sans)}button{font:inherit;color:inherit}.app{height:100dvh;min-height:0;display:flex;flex-direction:column;padding:0 22px 16px}.topbar{position:relative;z-index:5;display:flex;flex:0 0 66px;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #ffffff10}.brand{display:flex;align-items:center;gap:11px}.brand-mark{display:grid;width:36px;height:36px;place-items:center;border:1px solid #6955b3;border-radius:12px;background:linear-gradient(145deg,#7d67ef,#2c2855);font-size:19px;box-shadow:0 0 24px #9179ff35}.brand-name{font-size:14px;font-weight:850;letter-spacing:-.045em}.brand-sub{margin-top:2px;color:#8b96aa;font:8px var(--mono);letter-spacing:.13em;text-transform:uppercase}.population{display:flex;align-items:baseline;gap:8px;padding:7px 12px;border:1px solid #32415a;border-radius:10px;background:#101a2a9c}.population strong{font-size:17px;letter-spacing:-.06em;color:#eaf2ff}.population span{color:#93a3bc;font:8px var(--mono);letter-spacing:.12em;text-transform:uppercase}.header-right{display:flex;align-items:center;gap:13px}.live-pill,.sim-pill{display:inline-flex;align-items:center;gap:7px;color:#aeb8c9;font-size:9px}.live-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint);animation:pulse 1.7s infinite}.sim-pill{padding:6px 9px;border:1px solid #685b31;border-radius:20px;background:#2823148c;color:#e8d79f;font:8px var(--mono);letter-spacing:.07em}@keyframes pulse{50%{opacity:.35}}.arena{display:grid;grid-template-columns:minmax(0,7fr) minmax(280px,3fr);gap:15px;flex:1;min-height:0;padding-top:13px}.globe-stage{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #263349;border-radius:19px;background:radial-gradient(ellipse at 50% 47%,#14345642,#101a2b77 46%,#09101b 76%);box-shadow:inset 0 0 85px #286ca01a,0 20px 65px #0005}.globe-stage:after{position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px #ffffff05;pointer-events:none;content:""}#earthGlobe{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;outline:none}#earthGlobe:active{cursor:grabbing}.stage-title{position:absolute;z-index:2;top:18px;left:19px;pointer-events:none}.eyebrow{color:#a998ff;font:9px var(--mono);letter-spacing:.15em;text-transform:uppercase}.stage-headline{margin-top:5px;color:#f3f5fc;font-size:clamp(15px,1.8vw,23px);font-weight:850;letter-spacing:-.055em}.stage-subtitle{margin-top:4px;color:#91a0b5;font-size:9px}.stage-controls{position:absolute;z-index:3;right:16px;bottom:14px;display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid #29364a;border-radius:9px;background:#09101bbd;color:#98a8bf;font:8px var(--mono);letter-spacing:.08em;pointer-events:none;backdrop-filter:blur(10px)}.zoom-controls{display:inline-flex;gap:4px;pointer-events:auto}.zoom-btn{display:grid;width:20px;height:20px;place-items:center;border:1px solid #435069;border-radius:6px;background:#192236;color:#e3eaff;cursor:pointer;font:13px var(--sans)}.zoom-btn:hover{border-color:#9c8fff;background:#272544}.key{display:flex;align-items:center;gap:6px}.key-dot{width:6px;height:6px;border-radius:50%;background:#57f0c2;box-shadow:0 0 8px currentColor}.key-dot.ai{background:#b39cff;box-shadow:0 0 8px #b39cff}.pin-label{position:absolute;z-index:2;display:flex;align-items:center;gap:5px;max-width:160px;padding:4px 7px;border:1px solid #71e9cd55;border-radius:7px;background:#08111be8;color:#d9fff1;font-size:9px;font-weight:750;white-space:nowrap;box-shadow:0 3px 16px #0008,0 0 12px #67f0c426;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity .18s,transform .18s}.pin-label.visible{pointer-events:auto;cursor:pointer}.pin-label .pin-rank{flex:none;color:#7ff3d0;font:9px var(--mono)}.pin-label span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pin-label.top-three{padding:6px 9px;border-color:#f1ca735d;background:#19150feF;color:#fff0c3;font-size:10px;box-shadow:0 0 17px #f4d07038}.pin-label.top-three .pin-rank{color:#ffd980}.pin-label.visible{opacity:1}.pin-label.selected{z-index:4;border-color:#f1d281;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 0 23px #f3d17574}.globe-loader{position:absolute;z-index:1;left:50%;top:50%;color:#a1b3cd;font:9px var(--mono);letter-spacing:.12em;transform:translate(-50%,-50%);pointer-events:none}.globe-loader.hidden{display:none}.selected-person{position:absolute;z-index:4;left:18px;bottom:14px;width:min(310px,48%);padding:12px;border:1px solid #72613c;border-radius:13px;background:linear-gradient(145deg,#171b25ed,#11151eeF);box-shadow:0 10px 35px #0008,0 0 28px #edcc6b10;backdrop-filter:blur(10px);animation:card-in .25s ease-out}.selected-person[hidden]{display:none}@keyframes card-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.person-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.person-name{font-size:14px;font-weight:850;letter-spacing:-.04em}.person-rank{margin-top:4px;color:#e9d48e;font:9px var(--mono)}.person-close{display:grid;width:24px;height:24px;place-items:center;border:1px solid #ffffff18;border-radius:7px;background:#ffffff08;color:#aab5c7;cursor:pointer}.person-stats{display:flex;gap:14px;margin-top:9px;color:#94a0b2;font:8px var(--mono);text-transform:uppercase}.person-stats strong{display:block;margin-top:3px;color:#f1f3f8;font-size:11px;font-weight:500}.person-chart{height:69px;margin-top:8px}.rank-panel{display:flex;min-width:0;min-height:0;flex-direction:column;overflow:hidden;border:1px solid #2b3040;border-radius:18px;background:linear-gradient(155deg,#151a27,#0e121c 80%);box-shadow:0 18px 55px #0004}.rank-panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:17px 16px 12px;border-bottom:1px solid #ffffff0c}.rank-title{font-size:15px;font-weight:850;letter-spacing:-.045em}.rank-description{margin-top:4px;color:#8792a6;font-size:9px}.rank-count{padding:5px 7px;border:1px solid #4b4370;border-radius:7px;color:#c7baff;background:#1b1930;font:8px var(--mono)}.ai-list{display:flex;min-height:0;flex:1;flex-direction:column;gap:4px;overflow:auto;padding:10px 10px 9px;scrollbar-width:thin;scrollbar-color:#41495b transparent}.ai-list::-webkit-scrollbar{width:4px}.ai-list::-webkit-scrollbar-thumb{border-radius:4px;background:#434a5c}.ai-row{display:grid;grid-template-columns:26px 31px minmax(0,1fr) 51px;align-items:center;gap:7px;min-height:48px;padding:5px 7px;border:1px solid transparent;border-radius:10px;background:#ffffff04;transition:background .2s,border-color .2s,transform .2s}.ai-row:first-child{border-color:#87713c66;background:linear-gradient(90deg,#342b1d,#191c26)}.ai-row:hover{border-color:#514c70;background:#ffffff0b}.ai-rank{color:#919caf;font:11px var(--mono);text-align:center}.ai-row:first-child .ai-rank{color:#ffdc88}.ai-avatar{display:grid;width:29px;height:29px;place-items:center;border:1px solid #ffffff17;border-radius:9px;background:linear-gradient(140deg,#292d41,#191d2a);font-size:15px}.ai-copy{min-width:0}.ai-name{overflow:hidden;color:#e7eaf3;font-size:10px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.ai-owner{overflow:hidden;margin-top:3px;color:#858fa3;font-size:8px;text-overflow:ellipsis;white-space:nowrap}.ai-move{margin-left:3px;font-size:9px}.ai-score{color:#e5e8f1;font:9px var(--mono);text-align:right}.ai-score small{display:block;margin-top:3px;color:#8d97aa;font-size:7px}.rank-panel-foot{padding:9px 13px;border-top:1px solid #ffffff0b;color:#737f94;font-size:8px;line-height:1.45}.rank-panel-foot strong{color:#b7c2d4;font-weight:700}.status-toast{position:absolute;z-index:4;top:20px;right:18px;padding:8px 10px;border:1px solid #455540;border-radius:8px;background:#111b1bcc;color:#c9e8d9;font-size:9px;opacity:0;transform:translateY(-5px);transition:.2s;pointer-events:none}.status-toast.show{opacity:1;transform:translateY(0)}.no-webgl{position:absolute;inset:0;display:grid;place-items:center;color:#c6d4e8;font-size:12px}.no-webgl[hidden]{display:none}
+.support-button{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid #33384a;border-radius:8px;background:#121622;color:#bdc6d6;cursor:pointer;font-size:9px;transition:.2s}.support-button:hover{border-color:#8272cf;color:#e5ddff}.donate-overlay{position:fixed;z-index:20;inset:0;display:grid;place-items:center;padding:16px;background:#05070bdc;backdrop-filter:blur(9px)}.donate-overlay[hidden]{display:none}.donate-dialog{position:relative;width:min(100%,370px);padding:23px;border:1px solid #45425b;border-radius:17px;background:radial-gradient(ellipse at 50% 0,#39305b80,transparent 60%),#121621;box-shadow:0 24px 80px #000b}.donate-close{position:absolute;top:13px;right:13px;width:28px;height:28px;border:1px solid #353b4a;border-radius:8px;background:#181c27;color:#aab4c7;cursor:pointer}.donate-dialog h2{margin:8px 32px 7px 0;font-size:19px;letter-spacing:-.05em}.donate-dialog p{margin:12px 0 7px;color:#a0aabd;font-size:10px}.upi-number{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid #353b4b;border-radius:10px;background:#0d121c;color:#eff2f9;font:13px var(--mono)}.upi-number button{padding:7px 10px;border:1px solid #7765cb;border-radius:8px;background:#403475;color:#fff;cursor:pointer;font:9px var(--sans)}.copy-status{min-height:15px;padding-top:6px;color:#77efc4;font-size:9px}@media(max-width:760px){.support-button{padding:5px 6px;font-size:8px}.donate-dialog{padding:20px}.support-button span{display:inline}@media(max-width:380px){.support-button span{display:none}}}
+    @media(max-width:760px){.app{padding:0 10px 10px}.topbar{flex-basis:54px;gap:7px}.brand{gap:7px}.brand-mark{width:30px;height:30px;border-radius:10px;font-size:15px}.brand-name{font-size:11px}.brand-sub{font-size:7px}.header-right{gap:6px}.population{gap:4px;padding:6px 7px}.population strong{font-size:13px}.population span{font-size:6px}.live-pill{font-size:0}.sim-pill{padding:5px 6px;font-size:7px}.arena{grid-template-columns:1fr;grid-template-rows:minmax(0,7fr) minmax(0,3fr);gap:8px;padding-top:8px}.globe-stage{border-radius:15px}.stage-title{top:12px;left:13px}.eyebrow{font-size:7px}.stage-headline{font-size:15px}.stage-subtitle{max-width:220px;font-size:8px}.rank-panel{border-radius:14px}.rank-panel-head{padding:9px 12px 7px}.rank-title{font-size:12px}.rank-description{margin-top:2px;font-size:7px}.rank-count{font-size:7px}.ai-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(35px,1fr);gap:3px;padding:5px 6px;overflow:hidden}.ai-row{grid-template-columns:19px 25px minmax(0,1fr) 38px;gap:4px;min-height:0;padding:3px 4px;border-radius:7px}.ai-avatar{width:23px;height:23px;border-radius:7px;font-size:12px}.ai-name{font-size:8px}.ai-owner{margin-top:1px;font-size:6px}.ai-rank{font-size:9px}.ai-score{font-size:7px}.ai-score small{font-size:6px}.rank-panel-foot{padding:5px 9px;font-size:7px}.pin-label{gap:3px;max-width:110px;padding:3px 5px;border-radius:5px;font-size:7px}.pin-label .pin-rank{font-size:7px}.pin-label.top-three{font-size:8px}.selected-person{left:10px;bottom:10px;width:min(235px,55%);padding:8px;border-radius:10px}.person-name{font-size:11px}.person-rank{font-size:7px}.person-stats{gap:9px;margin-top:6px;font-size:7px}.person-stats strong{font-size:9px}.person-chart{height:47px;margin-top:5px}.stage-controls{right:8px;bottom:8px;gap:8px;padding:6px 7px;font-size:6px}.key{gap:4px}.key-dot{width:5px;height:5px}.status-toast{top:10px;right:9px;font-size:8px}}
+    @media(max-width:380px){.app{padding-inline:7px}.brand-name{font-size:10px}.brand-sub{display:none}.population span{display:none}.population{padding:6px}.stage-subtitle{max-width:165px}.ai-row{grid-template-columns:16px 22px minmax(0,1fr) 33px;gap:3px;padding-inline:3px}.ai-avatar{width:20px;height:20px;font-size:10px}.ai-name{font-size:7px}.ai-owner{font-size:5px}.ai-score{font-size:6px}.ai-score small{font-size:5px}.pin-label{max-width:87px;font-size:6px}.pin-label.top-three{font-size:7px}.selected-person{width:57%}.ai-list{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);align-content:stretch}.ai-row{grid-template-columns:12px 17px minmax(0,1fr);gap:2px;padding:2px 3px}.ai-avatar{width:17px;height:17px;font-size:9px}.ai-rank{font-size:7px}.ai-name{font-size:6px}.ai-owner,.ai-score{display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+  </style>
+<script data-goatcounter="https://aitradinghumans.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">◈</div><div><div class="brand-name">AI Trading Humans App</div><div class="brand-sub">The simulated fame index</div></div></div>
+      <div class="population" aria-label="Simulated human population"><strong>8.8B</strong><span>humans · simulated</span></div>
+      <div class="header-right"><div class="live-pill"><span class="live-dot"></span><span id="liveLabel">LIVE SIM</span></div><div class="sim-pill">ENTERTAINMENT ONLY</div><button class="support-button" id="supportOpen" type="button" aria-label="Support or donate">♡ <span>Support</span></button></div>
+    </header>
+    <section class="arena" aria-label="Live fame leaderboard and AI standings">
+      <section class="globe-stage" id="globeStage" aria-label="Interactive Earth with public figure rankings">
+        <canvas id="earthGlobe" aria-label="Rotating 3D Earth with ranked public figure pins. Drag to rotate and tap a pin for details."></canvas>
+        <div class="globe-loader" id="globeLoader">MAPPING THE WORLD…</div>
+        <div class="stage-title"><div class="eyebrow">World attention index · fictional</div><div class="stage-headline">The planet’s biggest names</div><div class="stage-subtitle" id="figureCount">PUBLIC FIGURES · LIVE SIMULATED RANKS</div></div>
+        <div class="stage-controls"><span class="key"><i class="key-dot"></i>PUBLIC FIGURES</span><span>DRAG TO SPIN · TAP A PIN</span><span class="zoom-controls"><button class="zoom-btn" id="zoomOut" type="button" aria-label="Zoom out">−</button><button class="zoom-btn" id="zoomIn" type="button" aria-label="Zoom in">+</button></span></div>
+        <div class="status-toast" id="statusToast" aria-live="polite"></div>
+        <section class="selected-person" id="selectedPerson" hidden aria-live="polite">
+          <div class="person-top"><div><div class="person-name" id="personName"></div><div class="person-rank" id="personRank"></div></div><button class="person-close" id="personClose" type="button" aria-label="Close person details">×</button></div>
+          <div class="person-stats"><span>Simulated index<strong id="personPrice"></strong></span><span>Latest move<strong id="personMove"></strong></span><span>Origin<strong id="personOrigin"></strong></span></div>
+          <div class="person-chart"><canvas id="personChart" role="img" aria-label="Selected public figure simulated index chart"></canvas></div>
+        </section>
+        <div class="no-webgl" id="globeFallback" hidden>3D globe unavailable in this browser.</div>
+      </section>
+      <aside class="rank-panel" aria-label="AI trader leaderboard">
+        <div class="rank-panel-head"><div><div class="eyebrow">Simulated model race</div><div class="rank-title">AI standings</div><div class="rank-description">Paper scores · refreshed live</div></div><span class="rank-count">8 MODELS</span></div>
+        <div class="ai-list" id="aiList" role="list" aria-label="AI model standings"></div>
+        <div class="rank-panel-foot"><strong>8 models, one leaderboard.</strong> Predictions and values are fictional and for entertainment only.</div>
+      </aside>
+    </section>
+  </main>
+  <div class="donate-overlay" id="donateModal" hidden>
+    <section class="donate-dialog" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
+      <button class="donate-close" id="donateClose" type="button" aria-label="Close support dialog">×</button>
+      <div class="eyebrow">Support the creator</div>
+      <h2 id="donateTitle">Optional donation, thank you!</h2>
+      <p>Google Pay / UPI number</p>
+      <div class="upi-number"><span id="upiNumber">+91 9100761710</span><button id="copyUpi" type="button">Copy</button></div>
+      <div class="copy-status" id="copyStatus" aria-live="polite"></div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      const countryGroups = [
+        ['United States',39.5,-98.35,'#66a8ff',['Beyoncé Knowles-Carter','Oprah Winfrey','Serena Williams','LeBron James','Bill Gates','Taylor Alison Swift','Kendrick Lamar','Lady Gaga','Tom Hanks','Meryl Streep','Dwayne Johnson','Kimberly Noel Kardashian','Mark Zuckerberg','Jeff Bezos','Ariana Grande-Butera','Zendaya Coleman','MrBeast Donaldson','Sabrina Carpenter','Tim Cook','Warren Buffett','Barack Obama','Michelle Obama','Donald Trump','Kamala Harris','Beyoncé','Brad Pitt','Angelina Jolie','Jennifer Aniston','Leonardo DiCaprio','Tom Cruise','Robert Downey Jr','Ryan Reynolds','Chris Evans','Scarlett Johansson','Will Smith','Kylie Jenner','Kris Jenner','Eminem Mathers','Snoop Dogg','Stephen Curry','Simone Biles','Tiger Woods','Billie Eilish','Alicia Keys','Miley Cyrus','Martha Stewart','Jamie Foxx','Morgan Freeman','Michael Jordan','Shaquille O’Neal','Venus Williams','Cori Gauff','Travis Scott','Post Malone','Lana Del Rey','Doja Cat','Ice Spice','Gwyneth Paltrow','Reese Witherspoon','Samuel L Jackson','Keanu Reeves','Jenna Ortega','Jennifer Lopez','Katy Perry','Justin Bieber','Ava DuVernay','Serena Williams','Ellen DeGeneres','Jimmy Fallon','Stephen Colbert','Neil deGrasse Tyson','Alexandria Ocasio-Cortez','Mark Cuban','Kanye West','Tyler Perry','Shonda Rhimes','Lin-Manuel Miranda','Megan Thee Stallion','Cher','Dolly Parton','Judea Pearl','Timothée Chalamet','Timothee Chalamet','Martha Stewart','Bob Dylan','Martin Scorsese','Quentin Tarantino']],
+        ['Canada',56.1,-106.3,'#ff706f',['Drake Graham','Justin Trudeau','Celine Dion','Ryan Gosling','Ryan Reynolds','The Weeknd Tesfaye','Shania Twain','Margaret Atwood','Jim Carrey','Seth Rogen','Keanu Reeves','Michael Bublé','Sandra Oh','Alanis Morissette','Avril Lavigne','Tate McRae','Shawn Mendes','Dan Levy','Elliot Page','Simu Liu','David Suzuki','Neil Young','James Cameron','Pamela Anderson','Rachel McAdams']],
+        ['United Kingdom',54,-2,'#b294ff',['Adele Laurie Blue Adkins','Ed Sheeran','David Beckham','Victoria Beckham','Elton John','J.K. Rowling','Emma Watson','Daniel Radcliffe','Benedict Cumberbatch','Lewis Hamilton','David Attenborough','King Charles III','Prince William','Dua Lipa','Stormzy','Paul McCartney','Mick Jagger','Kate Winslet','Idris Elba','Jude Bellingham','Harry Styles','Florence Pugh','Rishi Sunak','Keira Knightley','Christian Bale','Tom Holland','Rita Ora','Naomi Campbell','Simon Cowell','Gary Oldman','Stephen Fry','Zayn Malik',]],
+        ['France',46.2,2.2,'#8bb5ff',['Kylian Mbappé Lottin','Zinedine Zidane','Omar Sy','Marion Cotillard','Jean Reno','Léa Seydoux','Brigitte Macron','Emmanuel Macron','Thomas Pesquet','Carla Bruni','Gérard Depardieu','Teddy Riner','Aya Nakamura','Alain Delon']],
+        ['Germany',51.1,10.4,'#ffd36d',['Angela Merkel','Heidi Klum','Diane Kruger','Jürgen Klopp','Dirk Nowitzki','Toni Kroos','Manuel Neuer','Sandra Hüller','Frank-Walter Steinmeier','Boris Becker','Nico Rosberg','Claudia Schiffer']],
+        ['Spain',40.4,-3.7,'#ff9970',['Penélope Cruz','Rafael Nadal','Sergio Ramos','Pedro Almodóvar','Rosalía Vila Tobella','Pau Gasol','Carlos Alcaraz','Javier Bardem','Antonio Banderas','Sergio Busquets','Enrique Iglesias']],
+        ['Portugal',39.4,-8.2,'#70e6c6',['Cristiano Ronaldo dos Santos Aveiro','José Mourinho','Luís Figo','João Félix','Salvador Sobral']],
+        ['Argentina',-38.4,-63.6,'#75d5ff',['Lionel Andrés Messi','Pope Francis','Diego Maradona','Pablo Aimar','Emiliano Martínez','Javier Milei','Ricardo Darín','Bizarrap']],
+        ['Brazil',-10.8,-52.9,'#69dfaa',['Neymar Jr','Pelé','Gisele Bündchen','Anitta','Paulo Coelho','Luiz Inácio Lula da Silva','Vinícius Júnior','Ronaldo Nazário','Fernanda Montenegro','Rebeca Andrade','Wagner Moura']],
+        ['Mexico',23.6,-102.5,'#73d9a7',['Salma Hayek','Guillermo del Toro','Canelo Álvarez','Gael García Bernal','Diego Luna','Frida Kahlo','Carlos Slim','Eugenio Derbez','Claudia Sheinbaum']],
+        ['India',22.5,79,'#ffb367',['A. R. Rahman','Shah Rukh Khan','Amitabh Bachchan','Priyanka Chopra','Deepika Padukone','Virat Kohli','Sachin Tendulkar',,'Narendra Modi','Sundar Pichai','Satya Nadella','Mukesh Ambani','Aishwarya Rai','Alia Bhatt','Ranbir Kapoor','M. S. Dhoni','S. S. Rajamouli','Kiran Mazumdar-Shaw','Neeraj Chopra','Ratan Tata','Rajinikanth','Kareena Kapoor','Aamir Khan','Salman Khan','Rohit Sharma','P. V. Sindhu','Dilip Kumar']],
+        ['China',35.9,103.8,'#ff707e',['Jackie Chan','Yao Ming','Zhang Yimou','Fan Bingbing','Zhang Ziyi','Zhou Xun','Liu Yifei','Zhong Shanshan','Lei Jun','Ma Huateng','Zhang Yiming','Ren Zhengfei','Wang Yibo','Dilraba Dilmurat','Eileen Gu']],
+        ['South Korea',36.2,127.8,'#d39cff',['Bong Joon-ho','BTS Jungkook','BTS RM','BTS Jin','BLACKPINK Jennie','BLACKPINK Lisa','BLACKPINK Jisoo','BLACKPINK Rosé','Son Heung-min','Lee Jung-jae','Song Hye-kyo','Park Chan-wook','Lee Min-ho','IU Lee Ji-eun','Kim Yuna','PSY Park Jae-sang','Lee Byung-hun','Gong Yoo','NewJeans Minji']],
+        ['Japan',36.2,138.2,'#ff8ca7',['Hayao Miyazaki','Yoko Ono','Naomi Osaka','Shohei Ohtani','Hiroyuki Sanada','Yuzuru Hanyu','Ryuichi Sakamoto','Hideo Kojima','Masanori Murakami','Takeshi Kitano','Mika Nakashima','Marie Kondo',]],
+        ['Australia',-25.3,133.8,'#62d9c4',['Hugh Jackman','Nicole Kidman','Margot Robbie','Chris Hemsworth','Cate Blanchett','Kylie Minogue','Rebel Wilson','Cathy Freeman','Ash Barty','Troye Sivan','Iggy Azalea','Steve Irwin','Rupert Murdoch']],
+        ['South Africa',-29,24,'#f1ca69',['Elon Reeve Musk','Charlize Theron','Caster Semenya','Siya Kolisi','Nelson Mandela','Desmond Tutu','Miriam Makeba']],
+        ['Nigeria',9.1,8.7,'#71dc9f',['Burna Boy','Wizkid','Davido Adeleke','Chimamanda Ngozi Adichie','Ngozi Okonjo-Iweala','Tiwa Savage','Tems','Genevieve Nnaji']],
+        ['Colombia',4.6,-74.1,'#ffe071',['Shakira Isabel Mebarak Ripoll','Sofía Vergara','J Balvin','Juanes','James Rodríguez']],
+        ['Sweden',60.1,18.6,'#7bd9ff',['Greta Thunberg','Zlatan Ibrahimović','Alicia Vikander','Avicii Bergling',]],
+        ['Ireland',53.1,-8,'#90e6a1',['Bono Hewson','Saoirse Ronan','Cillian Murphy','Conor McGregor','Enya Brennan','Paul Mescal']],
+        ['Turkey',39,35,'#ff7f78',['Orhan Pamuk','Tarkan Tevetoğlu','Nuri Bilge Ceylan','Hakan Fidan','Can Yaman']],
+        ['Russia',61,105,'#9aaeff',['Maria Sharapova','Daniil Medvedev','Andrey Rublev','Valery Gergiev','Anna Netrebko']],
+        ['Ukraine',49,31,'#77bfff',['Volodymyr Zelenskyy','Andriy Shevchenko','Ruslana Lyzhychko','Serhiy Brin']],
+        ['New Zealand',-41.3,174.8,'#7cddc8',['Lorde Yelich-O’Connor','Peter Jackson','Taika Waititi','Jacinda Ardern','Russell Crowe']],
+        ['Egypt',26.8,30.8,'#f0c976',['Mohamed Salah','Omar Sharif','Naguib Mahfouz','Ramy Youssef']],
+        ['Pakistan',30.4,69.3,'#84d4ae',['Malala Yousafzai','Imran Khan','Atif Aslam','Nusrat Fateh Ali Khan']],
+        ['Kenya',0.2,37.9,'#f3bd6c',['Eliud Kipchoge','Lupita Nyong’o','Wangari Maathai','David Rudisha']],
+        ['Philippines',12.9,121.8,'#73c6ff',['Manny Pacquiao','Lea Salonga','Dolly de Leon','Catriona Gray']],
+        ['Thailand',15.8,101,'#f093b2',['Lisa Manobal','Tony Jaa','Apichatpong Weerasethakul']],
+        ['Norway',60.5,8.5,'#74d7ff',['Erling Haaland','Magnus Carlsen','A-ha Morten Harket']],
+        ['Switzerland',46.8,8.2,'#d6b4ff',['Roger Federer','Alain Berset','Ursula Andress']],
+        ['Israel',31.4,35,'#8abaff',['Gal Gadot','Natalie Portman','Noa Kirel']],
+        ['Indonesia',-2.5,118,'#ff9877',['Joe Taslim','Agnez Mo','Joko Widodo']],
+        ['Ghana',7.9,-1.0,'#73d39d',['Kofi Annan','Michael Essien','Ama Ata Aidoo']],
+        ['Cuba',21.5,-79.5,'#ffaf70',['Gloria Estefan','Celia Cruz','Ana de Armas']]
+      ];
+      countryGroups.push(
+        ['Netherlands',52.1,5.3,'#ff9d7b',['Vincent van Gogh','Max Verstappen','Armin van Buuren','Annie M. G. Schmidt','Virgil van Dijk','Rafael van der Vaart','Paul Verhoeven','Carice van Houten','Johan Cruyff','Frits Bolkestein','Eva Jinek','Martin Garrix','Rico Verhoeven','Doutzen Kroes','André Rieu']],
+        ['Belgium',50.5,4.5,'#e2bb71',[,'Jean-Claude Van Damme','Audrey Hepburn','Eden Hazard','Kevin De Bruyne','Hergé Remi','Angèle Van Laeken','Michiel Beers','Dries Van Noten','Romelu Lukaku','Adolphe Sax','Kim Clijsters']],
+        ['Austria',47.5,14.5,'#86baff',['Arnold Schwarzenegger','Wolfgang Amadeus Mozart','Gustav Klimt','Niki Lauda','Conchita Wurst','Dominic Thiem','Christoph Waltz','Hedy Lamarr','Stefan Zweig','Elfriede Jelinek','Herbert von Karajan','Felix Baumgartner']],
+        ['Poland',52,19.1,'#e27f82',['Robert Lewandowski','Marie Curie','Lech Wałęsa','Iga Świątek','Andrzej Sapkowski','Frederic Chopin','Robert Kubica','Agnieszka Holland','Olga Tokarczuk','Joanna Jędrzejczyk','Wanda Rutkiewicz','Zbigniew Boniek']],
+        ['Greece',39,22,'#79b9e8',['Giannis Antetokounmpo','Maria Callas','Nikos Kazantzakis','Yanni Chryssomallis','Theo Angelopoulos','Irene Papas','Stefanos Tsitsipas','Melina Mercouri','Vangelis Papathanassiou','Dimitris Diamantidis']],
+        ['Denmark',56,9.5,'#e9888d',['Mads Mikkelsen','Niels Bohr','Hans Christian Andersen','Caroline Wozniacki','Viggo Mortensen','Lars von Trier','Bjarne Stroustrup','Nikolaj Coster-Waldau','MØ Ørsted','Peter Schmeichel']],
+        ['Finland',64,26,'#79cff1',['Linus Torvalds','Kimi Räikkönen','Sanna Marin','Jean Sibelius','Tove Jansson','Lauri Markkanen','Tarja Halonen','Aki Kaurismäki','Alvar Aalto','Nokia Jorma Ollila']],
+        ['Iceland',65,-18,'#8dcfff',['Björk Guðmundsdóttir','Halldór Laxness','Vigdís Finnbogadóttir','Katrín Jakobsdóttir','Hafþór Júlíus Björnsson','Jónsi Birgisson','Annie Mist Þórisdóttir']],
+        ['Morocco',31.8,-6,'#73d9ae',['Achraf Hakimi','Nawal El Moutawakel','French Montana Kharbouch','Hicham El Guerrouj','Leila Slimani','Saad Lamjarred','Asma Lamrabet','Hakim Ziyech','Najat Vallaud-Belkacem']],
+        ['Ethiopia',9,40,'#f1ce69',['Abebe Bikila','Haile Gebrselassie','Tirunesh Dibaba','Liya Kebede','Aster Aweke','Abiy Ahmed','Kenenisa Bekele','Tewodros Kassahun']],
+        ['Senegal',14.5,-14.5,'#81d5a0',['Sadio Mané','Youssou N’Dour','Léopold Sédar Senghor','Ousmane Sembène','Akon Thiam','Macky Sall','Kalidou Koulibaly']],
+        ['Ivory Coast',7.5,-5.5,'#ffb87a',['Didier Drogba','Yaya Touré','Alpha Blondy','Félix Houphouët-Boigny','Aya Nakamura','Didier Zokora','Magic System A’Salfo']],
+        ['Cameroon',5.7,12.7,'#a3d97b',['Samuel Eto’o','Francis Ngannou','Manu Dibango','Roger Milla','Richard Bona','Charlotte Dipanda','Benoît Assou-Ekotto']],
+        ['Tanzania',-6.4,35.6,'#7ad7c0',['Diamond Platnumz','Julius Nyerere','Samia Suluhu Hassan','Ali Kiba','Mbwana Samatta','Abdulrazak Gurnah']],
+        ['Rwanda',-1.9,29.9,'#7db9ff',['Paul Kagame','Diane Fossey','Sonia Rolland',,'Meddy Ngabo','Salima Mukansanga']],
+        ['Chile',-30,-71,'#f0c874',['Pablo Neruda','Isabel Allende','Alexis Sánchez','Pedro Pascal','Claudio Bravo','Gabriela Mistral','Arturo Vidal','Mon Laferte','Cecilia Bolocco','Sebastián Piñera']],
+        ['Peru',-9.2,-75,'#e77776',['Mario Vargas Llosa','Claudia Llosa','Gastón Acurio','Sofía Mulanovich','Paolo Guerrero','Susana Baca','Yma Sumac','Pedro Castillo']],
+        ['Venezuela',7,-66,'#e5bf70',['Simón Bolívar','Gustavo Dudamel','Edgar Ramírez','Carolina Herrera','Deyna Castellanos','José Altuve','Bárbara Palacios','Franco De Vita']],
+        ['Uruguay',-32.5,-56,'#73c9e3',['Luis Suárez','José Mujica','Edinson Cavani','Jorge Drexler','Natalia Oreiro','Diego Forlán','Mario Benedetti']],
+        ['Jamaica',18.1,-77.3,'#74d99c',['Usain Bolt','Bob Marley','Shelly-Ann Fraser-Pryce','Sean Paul Henriques','Grace Jones','Jimmy Cliff','Shaggy Burrell','Marcus Garvey']],
+        ['Dominican Republic',19,-70.7,'#79b5ff',['Oscar de la Renta','Juan Luis Guerra','David Ortiz','Romeo Santos','Zoe Saldaña','Manny Ramírez','Pedro Martínez','Cardi B Almanzar']],
+        ['Costa Rica',9.9,-84.1,'#79d4a0',['Keylor Navas','Claudia Poll','Franklin Chang-Díaz','Óscar Arias','Debi Nova','Chavela Vargas']],
+        ['Panama',8.5,-80,'#ffbd72',['Rubén Blades','Mariano Rivera','Roberto Durán','Irving Saladino','Rómulo Escobar Bethancourt','Sech Morales']],
+        ['Bangladesh',23.7,90.4,'#8fc982',['Muhammad Yunus','Shakib Al Hasan','Sheikh Hasina','Tahsan Rahman Khan','Jaya Ahsan','Sakib Khan','Sabyasachi Chakrabarty','Fazlur Rahman Khan']],
+        ['Nepal',28.4,84.1,'#7fc1e8',['Tenzing Norgay','Bidhya Devi Bhandari','Anuradha Koirala','Manisha Koirala','Pasang Lhamu Sherpa','Mira Rai','Sandeep Lamichhane']],
+        ['Sri Lanka',7.9,80.7,'#f5ba70',['Kumar Sangakkara','Muttiah Muralitharan','Mahela Jayawardene','Jacqueline Fernandez','Michael Ondaatje','Anagarika Dharmapala','Angelo Mathews']],
+        ['Vietnam',16.2,107.8,'#8fcf82',['Ho Chi Minh','Nguyễn Thị Phương Thảo','Son Tung M-TP','Thích Nhất Hạnh','Nguyễn Du','Đặng Thái Sơn','Nguyễn Phú Trọng']],
+        ['Malaysia',4.2,102,'#a1d47a',['Michelle Yeoh','Jimmy Choo','Lee Chong Wei','Tony Fernandes','Yuna Zarai','Dr. Mahathir Mohamad','Pandelela Rinong','Siti Nurhaliza']],
+        ['Singapore',1.35,103.8,'#ff8c87',['Lee Kuan Yew','Joseph Schooling','Kumaravadivelu','Dick Lee','Piyush Gupta','Katherine Ho','Fann Wong']],
+        ['Iran',32,53,'#81b8e6',['Asghar Farhadi','Shirin Ebadi','Marjane Satrapi','Anousheh Ansari','Ali Daei','Taraneh Alidoosti','Mohammad Reza Shajarian','Golshifteh Farahani']],
+        ['Iraq',33,44,'#f2c879',['Zaha Hadid','Nadia Murad','Kadim Al Sahir','Zico (footballer)','Sinan Antoon','Ahmed Al-Basheer']],
+        ['Lebanon',33.9,35.9,'#87c7f0',['Fairuz Haddad','Mika Penniman','Nadim Karam','Elie Saab','Najat Aoun Saliba','Nancy Ajram','Hassan Nasrallah','Ragheb Alama']],
+        ['Croatia',45.1,15.2,'#79baff',['Luka Modrić','Marin Čilić','Dražen Petrović','Janica Kostelić','Goran Višnjić','Miroslav Radman','Severina Vučković','Dino Merlin']],
+        ['Serbia',44,21,'#e98483',['Novak Djokovic','Nikola Tesla','Marina Abramović','Emir Kusturica','Ana Ivanovic','Vlade Divac','Miloš Teodosić','Nemanja Vidić']],
+        ['Romania',45.9,24.9,'#7cb4ec',['Nadia Comăneci','Simona Halep','Sebastian Stan','Gheorghe Hagi','Angela Gheorghiu','Mircea Eliade','Cristian Mungiu','Ilie Năstase']],
+        ['Czechia',49.8,15.5,'#78b4e5',['Ivan Lendl','Martina Navratilova','Miloš Forman','Václav Havel','Petra Kvitová','Antonín Dvořák','Tomáš Rosický','Karel Gott']],
+        ['Hungary',47.2,19.5,'#82d3b3',['Harry Houdini','Ernő Rubik','Katalin Karikó','Ferenc Puskás','Béla Bartók','Krisztina Egerszegi','László Krasznahorkai','Zsa Zsa Gabor']],
+        ['Saudi Arabia',24,45,'#88d0a0',['Mohammed bin Salman','Alwaleed bin Talal','Yasir Al-Rumayyan','Salman Al-Faraj','Fahad Al-Muwallad']],
+        ['United Arab Emirates',24.2,54.4,'#73c6ef',['Sheikh Mohammed bin Rashid Al Maktoum','Hussain Sajwani','Huda Kattan','Mo Vlogs','Hamad Buamim','Rashed Belhasa','Hussain Al Jassmi','Ahlam Al Shamsi']],
+        ['Qatar',25.3,51.2,'#d797b7',['Tamim bin Hamad Al Thani','Mutaz Barshim','Nasser Al-Attiyah','Dana Al Fardan','Akbar Al Baker']],
+        ['United Arab Emirates',24.2,54.4,'#73c6ef',['Hamdan bin Mohammed Al Maktoum','Rashed Al-Majed','Abdullah Al Rowaished']],
+        ['United States',39.5,-98.35,'#66a8ff',['Jensen Huang','Sam Altman','Elon Reeve Musk','Larry Ellison','Michael Bloomberg','Steve Jobs','Paul McCartney','Jeffrey Bezos','Sergey Brin','Larry Page','Satya Nadella','Oprah Gail Winfrey','Kobe Bryant','Magic Johnson','Martha Stewart','Linus Torvalds','John Legend','Viola Davis','Quincy Jones','James Earl Jones']],
+        ['India',22.5,79,'#ffb367',['Dhanush Rajinikanth','Vijay Joseph','Yash Gowda','Saina Nehwal','Mary Kom','A. P. J. Abdul Kalam','Arundhati Roy','Vikram Seth','Pankaj Advani','Nandan Nilekani','Azim Premji','Anand Mahindra','K. S. Chithra','Mammootty','Mohanlal Viswanathan','Rishabh Pant','Ravichandran Ashwin','Smriti Mandhana']],
+        ['United Kingdom',54,-2,'#b294ff',['Ringo Starr','David Bowie','George Michael','Bobby Charlton','Mo Farah','J. R. R. Tolkien','Virginia Woolf','Mary Quant','Gareth Bale','Ronnie O’Sullivan','Rosalind Franklin','Mary Berry','Jamie Oliver','Ricky Gervais']],
+        ['Brazil',-10.8,-52.9,'#69dfaa',['Ayrton Senna','Romário de Souza Faria','Cafu Marcos','Ronaldinho Gaúcho','Marta Vieira da Silva','Pelé Edson Arantes do Nascimento','Fernanda Lima','Caetano Veloso','Gilberto Gil','Anitta Larissa de Macedo','Silvio Santos','Xuxa Meneghel']],
+        ['Japan',36.2,138.2,'#ff8ca7',['Akira Kurosawa','Issey Miyake','Yoko Kanno','Rinko Kikuchi','Ken Watanabe','Tadao Ando','Masayoshi Son','Takemitsu Toru','Hideki Matsui','Yoko Taro','Kenzaburo Oe']],
+        ['South Korea',36.2,127.8,'#d39cff',['Lee Kun-hee','Lee Jae-yong','Kim Dae-jung','Kim Yuna','Hwang Dong-hyuk','Bae Suzy','Kim Taehyung','Choi Min-sik','Youn Yuh-jung']],
+        ['China',35.9,103.8,'#ff707e',['Zhou Enlai','Liu Cixin','Lang Lang','Gong Li','Liu Wen','Yao Ming','Ding Junhui','Chen Kaige','Ai Weiwei','Ma Long','Zhang Ziyi']],
+        ['Australia',-25.3,133.8,'#62d9c4',['Peter Dutton','Ian Thorpe','Pat Rafter','Lleyton Hewitt','Don Bradman','Peter Carey','Judith Wright','Turia Pitt','Gina Rinehart','Andrew Forrest','Clive Palmer']],
+        ['Mexico',23.6,-102.5,'#73d9a7',['Alejandro González Iñárritu','Carlos Santana','Vicente Fernández','Thalía Sodi','Julio César Chávez','Karla Souza','Jorge Ramos','José Hernández','Guillermo Ochoa','César Millán']],
+        ['France',46.2,2.2,'#8bb5ff',['Zinedine Zidane','Claude Monet','Marcel Proust','Françoise Hardy','Catherine Deneuve','Jean-Paul Gaultier','Serge Gainsbourg','Louis Pasteur','Kylian Mbappé Lottin']],
+        ['Germany',51.1,10.4,'#ffd36d',['Albert Einstein','Ludwig van Beethoven','Claudia Pechstein','Mesut Özil','Toni Kroos','Anne Frank','Boris Becker','Karl Lagerfeld','Michael Schumacher']],
+        ['Nigeria',9.1,8.7,'#71dc9f',['Fela Kuti','Chinua Achebe','Hakeem Olajuwon','John Boyega','Burna Boy Damini Ogulu','Genevieve Nnaji','Flavour N’abania','Nneka Egbuna']],
+        ['Russia',61,105,'#9aaeff',['Mikhail Baryshnikov','Pavel Durov','Anna Kournikova','Yuri Gagarin','Vladimir Putin','Dmitry Medvedev','Alexander Ovechkin','Evgeni Plushenko']],
+        ['South Africa',-29,24,'#f1ca69',['Caster Semenya','Miriam Makeba','Trevor Noah Noah','Patrice Motsepe','DJ Black Coffee','Mark Shuttleworth','Wayde van Niekerk']],
+        ['Sweden',60.1,18.6,'#7bd9ff',['ABBA Agnetha Fältskog','Björn Ulvaeus','Max Martin Sandberg','Henrik Larsson','Stieg Larsson','Loreen Talhaoui','Alexander Skarsgård','Ingvar Kamprad']],
+        ['New Zealand',-41.3,174.8,'#7cddc8',['Edmund Hillary','Kiri Te Kanawa','Danielle Cormack','Valerie Adams','Lydia Ko','Bret McKenzie','Sam Neill','Lucy Lawless']],
+        ['Kenya',0.2,37.9,'#f3bd6c',['Eliud Kipchoge','Faith Kipyegon','David Rudisha','Wangari Maathai','Paul Tergat','Ezekiel Kemboi','Julius Yego']],
+        ['Philippines',12.9,121.8,'#73c6ff',['Manny Pacquiao','Liza Soberano','Sarah Geronimo','Nadine Lustre','Apl.de.ap Bennington','Pia Wurtzbach','Bongbong Marcos']],
+        ['Indonesia',-2.5,118,'#ff9877',['Agnes Monica','Raisa Andriana','Iko Uwais','Rich Brian Wang','Joko Widodo','Sri Mulyani Indrawati','Nadiem Makarim','Chairul Tanjung']],
+        ['Egypt',26.8,30.8,'#f0c976',['Mohamed Salah Hamed','Umm Kulthum Ibrahim','Amr Diab Abdel-Basset','Naguib Mahfouz','Ramy Ashour','Hossam Hassan','Yousra Mohamed','Ahmed Zewail']],
+        ['Pakistan',30.4,69.3,'#84d4ae',['Shahbaz Sharif','Wasim Akram','Nusrat Fateh Ali Khan','Mahira Khan','Fawad Khan','Atif Aslam','Abdul Sattar Edhi','Babar Azam']],
+        ['Colombia',4.6,-74.1,'#ffe071',['Fernando Botero','Carlos Vives','Nairo Quintana','Camilo Echeverry','Carolina Gaitán','Luis Díaz','Egan Bernal']],
+        ['Ireland',53.1,-8,'#90e6a1',['Sinead O’Connor','James Joyce','Oscar Wilde','Katie Taylor','Katie McCabe','Enya Patricia Brennan','Bono Paul Hewson','Paul Mescal']],
+        ['Turkey',39,35,'#ff7f78',['Orhan Pamuk','Nuri Bilge Ceylan','Hidayet Türkoğlu','Tarkan Tevetoğlu','Sertab Erener','Can Yaman','Haluk Bilginer','Aziz Sancar']],
+        ['Argentina',-38.4,-63.6,'#75d5ff',['Eva Perón','Manu Ginóbili','Carlos Gardel','Mercedes Sosa','Juan Martín del Potro','Marta Minujín','Ángel Di María','Diego Simeone']],
+        ['Spain',40.4,-3.7,'#ff9970',['Pau Gasol','Javier Solana','Fernando Alonso','Carolina Marín','Enrique Iglesias Preysler','Joan Miró','Rafael Nadal Parera','Fernando Torres']],
+        ['Portugal',39.4,-8.2,'#70e6c6',['José Saramago','Eusébio da Silva Ferreira','José Mourinho','Amália Rodrigues','João Moutinho','Salvador Sobral','Sara Sampaio']],
+        ['Norway',60.5,8.5,'#74d7ff',['Edvard Munch','Henrik Ibsen','Ole Gunnar Solskjær','Morten Harket','Aksel Lund Svindal','Sigrid Solbakk Raabe']],
+        ['Switzerland',46.8,8.2,'#d6b4ff',['Carl Jung','Ursula Andress','Stan Wawrinka','Tina Turner Bullock','Carl Friedrich Gauss','Sophie Taeuber-Arp']],
+        ['Israel',31.4,35,'#8abaff',['Natalie Portman Hershlag','Gal Gadot Varsano','Ari Folman','Bar Refaeli','Yuval Noah Harari','Gad Elmaleh','Noa Tishby']],
+        ['Cuba',21.5,-79.5,'#ffaf70',['Celia Cruz Alfonso','Gloria Estefan','Ana de Armas Caso','Yoel Romero','José Martí','Alicia Alonso','Dámaso Pérez Prado']],
+        ['Ghana',7.9,-1,'#73d39d',['Kofi Annan','Michael Essien','Abedi Pele','Azumah Nelson','Jackie Appiah','Stonebwoy Satekla','John Dumelo']],
+        ['Thailand',15.8,101,'#f093b2',['Lisa Manobal','Tony Jaa Panom','Apichatpong Weerasethakul','Buakaw Banchamek','Lalisa Manobal','Ratchanok Intanon','Mario Maurer']],
+        ['Denmark',56,9.5,'#e9888d',['Caroline Wozniacki','Niels Bohr','Mads Mikkelsen','Bjarne Stroustrup','Anders Thomas Jensen','Nicolai Coster-Waldau']],
+        ['Belgium',50.5,4.5,'#e2bb71',['Eddy Merckx','Jean-Claude Van Damme','Kevin De Bruyne','Rene Magritte','Kim Clijsters','Eden Hazard']],
+        ['Austria',47.5,14.5,'#86baff',['Wolfgang Amadeus Mozart','Arnold Schwarzenegger','Niki Lauda','Gustav Klimt','Christoph Waltz','Dominic Thiem']],
+        ['Greece',39,22,'#79b9e8',['Giannis Antetokounmpo','Maria Callas','Irene Papas','Stefanos Tsitsipas','Vangelis Papathanassiou']],
+        ['Czechia',49.8,15.5,'#78b4e5',['Martina Navratilova','Ivan Lendl','Petra Kvitová','Miloš Forman','Václav Havel']],
+        ['Hungary',47.2,19.5,'#82d3b3',['Ernő Rubik','Katalin Karikó','Ferenc Puskás','Béla Bartók','Harry Houdini Weiss']],
+        ['Romania',45.9,24.9,'#7cb4ec',['Nadia Comăneci','Simona Halep','Sebastian Stan','Gheorghe Hagi','Cristian Mungiu']],
+        ['Serbia',44,21,'#e98483',['Novak Djokovic','Nikola Tesla','Marina Abramović','Emir Kusturica','Ana Ivanovic']],
+        ['Saudi Arabia',24,45,'#88d0a0',['Alwaleed bin Talal','Mohammed bin Salman','Yasir Al-Rumayyan','Nasser Al-Khelaifi']],
+        ['United Arab Emirates',24.2,54.4,'#73c6ef',['Huda Kattan','Hussain Sajwani','Mo Vlogs','Hamdan bin Mohammed Al Maktoum','Hussain Al Jassmi']],
+        ['Qatar',25.3,51.2,'#d797b7',['Mutaz Barshim','Tamim bin Hamad Al Thani','Nasser Al-Attiyah','Dana Al Fardan']]
+      );
+      const uniqueNames = new Set();
+      const businessPeople = new Set(['Elon Reeve Musk','Jeff Bezos','Bill Gates','Jensen Huang','Sam Altman','Larry Ellison','Warren Buffett','Mark Zuckerberg','Satya Nadella','Sundar Pichai','Mukesh Ambani','Carlos Slim','Jack Ma','Ma Huateng','Zhang Yiming','Alwaleed bin Talal','Hussain Sajwani','Ratan Tata','Nandan Nilekani','Azim Premji','Gina Rinehart','Andrew Forrest','Carlos Slim','Masayoshi Son','Pavel Durov','Tony Fernandes','Huda Kattan','Fazlur Rahman Khan','Linus Torvalds','Steve Jobs','Sergey Brin','Larry Page','Oprah Winfrey','Mark Cuban','Michael Bloomberg','Richard Branson','Amancio Ortega','Bernard Arnault']);
+      const politicalPeople = new Set(['Barack Obama','Michelle Obama','Donald Trump','Kamala Harris','Narendra Modi','Justin Trudeau','Emmanuel Macron','King Charles III','Prince William','Angela Merkel','Volodymyr Zelenskyy','Vladimir Putin','Joko Widodo','Sheikh Mohammed bin Rashid Al Maktoum','Mohammed bin Salman','Lee Kuan Yew','José Mujica','Jacinda Ardern','Nelson Mandela','Paul Kagame','Kofi Annan','Malala Yousafzai','Imran Khan','Mahathir Mohamad','Abiy Ahmed','Macky Sall','Samia Suluhu Hassan','Lula da Silva','Lula','Pope Francis']);
+      const sportsNames = new Set(['Serena Williams','LeBron James','Lionel Andrés Messi','Cristiano Ronaldo dos Santos Aveiro','Kylian Mbappé Lottin','Neymar Jr','Rafael Nadal','Virat Kohli','Sachin Tendulkar','Lewis Hamilton','Tiger Woods','Stephen Curry','Shohei Ohtani','Yao Ming','Manny Pacquiao','Usain Bolt','Eliud Kipchoge','Naomi Osaka','Roger Federer','Max Verstappen','Sadio Mané','Mohamed Salah','Erling Haaland','Luka Modrić','Giannis Antetokounmpo','Simone Biles','Michael Jordan','Kobe Bryant','Diego Maradona','Pelé','Zinedine Zidane','Novak Djokovic','Iga Świątek','Canelo Álvarez','Conor McGregor','Marta Vieira da Silva','Marta','Alexis Sánchez','Luis Suárez','Kimi Räikkönen','Toni Kroos','Nadia Comăneci','Saina Nehwal','Mary Kom','P. V. Sindhu','M. S. Dhoni','Rohit Sharma','Virgil van Dijk','Son Heung-min','Yuzuru Hanyu','Hakeem Olajuwon','Muttiah Muralitharan','Babar Azam','Shakib Al Hasan','Manny Ramírez','David Ortiz','Fernando Alonso','Katie Taylor','Caster Semenya','Abebe Bikila','Haile Gebrselassie','Teddy Riner','Tarkan']);
+      const categoryFor = name => sportsNames.has(name) ? 'Sports' : businessPeople.has(name) ? 'Business' : politicalPeople.has(name) ? 'Politics' : 'Entertainment & culture';
+      const people = [];
+      countryGroups.forEach(([country, latitude, longitude, color, names], groupIndex) => names.forEach((name, index) => {
+        const normalized = name.toLowerCase().replace(/[^a-z]/g, '');
+        if (uniqueNames.has(normalized)) return;
+        uniqueNames.add(normalized);
+        const spread = names.length > 1 ? (index - (names.length - 1) / 2) * 1.25 : 0;
+        people.push({ name, country, category: categoryFor(name), latitude: latitude + Math.sin(index * 2.31) * 3.3 + spread * .28, longitude: longitude + Math.cos(index * 1.73) * 5 + spread, color, price: 78 + ((groupIndex * 43 + index * 67) % 1780), change: 0, history: [] });
+      }));
+      const traders = [
+        {name:'GPT',org:'OpenAI',icon:'🤖',color:'#9b8cff',score:82.4,previous:1},
+        {name:'Claude',org:'Anthropic',icon:'🟠',color:'#62d9af',score:79.8,previous:2},
+        {name:'Gemini',org:'Google',icon:'✨',color:'#5db8f5',score:76.1,previous:3},
+        {name:'Grok',org:'xAI',icon:'𝕏',color:'#f6bd60',score:74.9,previous:4},
+        {name:'Llama',org:'Meta',icon:'🦙',color:'#c091ff',score:73.5,previous:5},
+        {name:'Mistral',org:'Mistral AI',icon:'🌬️',color:'#fc829a',score:71.2,previous:6},
+        {name:'DeepSeek',org:'DeepSeek',icon:'🌊',color:'#6fe1db',score:68.7,previous:7},
+        {name:'Qwen',org:'Alibaba',icon:'☁️',color:'#f28c63',score:66.3,previous:8}
+      ];
+      let selectedPerson = null;
+      let personChart = null;
+      let tick = 0;
+      let globe = null;
+      let markerRecords = [];
+      let personPinMesh = null;
+      let personHaloMesh = null;
+      let rankedPeople = [];
+      let personRanks = new Map();
+      let topLabels = [];
+      function refreshRanking(){
+        rankedPeople=[...people].sort((a,b)=>b.price-a.price);
+        personRanks=new Map(rankedPeople.map((person,index)=>[person,index+1]));
+        updateGlobeLabels();
+      }
+      const money = value => '$' + value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const percent = value => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+      const rankOf = person => [...people].sort((a,b)=>b.price-a.price).indexOf(person)+1;
+
+      function seedPrices(){
+        document.getElementById('figureCount').textContent=`${people.length} PUBLIC FIGURES · LIVE SIMULATED RANKS`;
+        refreshRanking();
+        people.forEach((person,index)=>{
+          const base=person.price;
+          for(let point=0;point<30;point+=1) person.history.push(base*(.93+point*.0024+Math.sin((index+point)*.57)*.022+Math.cos((index*3+point)*.25)*.014));
+          person.history[29]=base;
+        });
+      }
+      function renderAI(){
+        const sorted=[...traders].sort((a,b)=>b.score-a.score);
+        const host=document.getElementById('aiList');
+        host.innerHTML=sorted.map((trader,index)=>{
+          const move=trader.previous>index+1?'↑':trader.previous<index+1?'↓':'·';
+          const tone=move==='↑'?'#68f0c4':move==='↓'?'#ff8295':'#8490a4';
+          return `<div class="ai-row" role="listitem" aria-label="Rank ${index+1}, ${trader.name}, simulated score ${trader.score.toFixed(1)}"><span class="ai-rank">${index+1}<span class="ai-move" style="color:${tone}">${move}</span></span><span class="ai-avatar" style="border-color:${trader.color}55">${trader.icon}</span><span class="ai-copy"><span class="ai-name">${trader.name}</span><span class="ai-owner">${trader.org}</span></span><span class="ai-score">${trader.score.toFixed(1)}<small>PAPER PTS</small></span></div>`;
+        }).join('');
+        sorted.forEach((trader,index)=>{trader.previous=index+1;});
+      }
+      function showSelection(person){
+        selectedPerson=person;
+        const ranking=[...people].sort((a,b)=>b.price-a.price);
+        document.getElementById('personName').textContent=person.name;
+        document.getElementById('personRank').textContent=`#${ranking.indexOf(person)+1} · ${person.category} · ${person.country}`;
+        document.getElementById('personPrice').textContent=money(person.price);
+        const move=document.getElementById('personMove');
+        move.textContent=percent(person.change);
+        move.style.color=person.change>=0?'var(--mint)':'var(--red)';
+        document.getElementById('personOrigin').textContent=person.country;
+        document.getElementById('personOrigin').title=person.category;
+        document.getElementById('selectedPerson').hidden=false;
+        topLabels.forEach(label=>label.classList.toggle('selected',label.person===person));
+        if(personChart){
+          personChart.data.labels=person.history.map((_,index)=>index===person.history.length-1?'NOW':`-${person.history.length-index}`);
+          personChart.data.datasets[0].data=[...person.history];
+          personChart.data.datasets[0].borderColor=person.change>=0?'#68f0c4':'#ff8295';
+          personChart.update('none');
+        }
+      }
+      function makePersonChart(){
+        if(!window.Chart) return;
+        const context=document.getElementById('personChart').getContext('2d');
+        const fill=context.createLinearGradient(0,0,0,85);fill.addColorStop(0,'#67edbd38');fill.addColorStop(1,'#67edbd00');
+        personChart=new Chart(context,{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#68f0c4',backgroundColor:fill,fill:true,tension:.38,borderWidth:2,pointRadius:0,pointHoverRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false},tooltip:{enabled:true,displayColors:false,backgroundColor:'#121a28',titleColor:'#aebbd0',bodyColor:'#eff4ff',callbacks:{title:items=>items.length?'Simulated snapshot':'' ,label:context=>money(context.parsed.y)}}},scales:{x:{display:false,grid:{display:false}},y:{display:false,grid:{display:false}}}}});
+      }
+      function updateSelected(){if(selectedPerson)showSelection(selectedPerson);}
+      function updateSimulation(){
+        tick+=1;
+        people.forEach(person=>{
+          const change=(Math.random()-.485)*.018+Math.sin((tick+person.price)*.002)*.001;
+          person.price=Math.max(10,person.price*(1+change));person.change=change*100;
+          person.history.push(person.price);if(person.history.length>45)person.history.shift();
+        });
+        traders.forEach(trader=>{trader.score=Math.max(20,Math.min(99,trader.score+(Math.random()-.49)*1.2));});
+        renderAI();refreshRanking();updateGlobePins();updateSelected();
+      }
+
+      function createGlobe(){
+        const canvas=document.getElementById('earthGlobe');
+        if(!window.THREE){document.getElementById('globeLoader').classList.add('hidden');document.getElementById('globeFallback').hidden=false;return;}
+        try{
+          const T=window.THREE;
+          const renderer=new T.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.outputColorSpace=T.SRGBColorSpace;
+          const scene=new T.Scene();
+          const camera=new T.PerspectiveCamera(34,1,.1,80);camera.position.set(0,0,5.1);
+          const adjustZoom=amount=>{camera.userData.zoomed=true;camera.position.z=Math.max(3.8,Math.min(7.3,camera.position.z+amount));};
+          document.getElementById('zoomIn').addEventListener('click',()=>adjustZoom(-.35));
+          document.getElementById('zoomOut').addEventListener('click',()=>adjustZoom(.35));
+          canvas.addEventListener('wheel',event=>{event.preventDefault();adjustZoom(Math.sign(event.deltaY)*.18);},{passive:false});
+          const earthGroup=new T.Group();earthGroup.rotation.z=-.12;scene.add(earthGroup);
+          scene.add(new T.AmbientLight(0xa2c5ff,1.15));
+          const keyLight=new T.DirectionalLight(0xd8e9ff,2.4);keyLight.position.set(-3,2.5,4);scene.add(keyLight);
+          const rimLight=new T.DirectionalLight(0x426dff,1.4);rimLight.position.set(4,-2,-3);scene.add(rimLight);
+          const sphere=new T.Mesh(new T.SphereGeometry(1.5,72,56),new T.MeshPhongMaterial({color:0x3475aa,shininess:19,specular:0x436d91}));earthGroup.add(sphere);
+          const loader=new T.TextureLoader();loader.setCrossOrigin('anonymous');
+          loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',texture=>{texture.colorSpace=T.SRGBColorSpace;sphere.material.map=texture;sphere.material.color.set(0xffffff);sphere.material.needsUpdate=true;document.getElementById('globeLoader').classList.add('hidden');},undefined,()=>{document.getElementById('globeLoader').classList.add('hidden');});
+          const glow=new T.Mesh(new T.SphereGeometry(1.57,64,48),new T.ShaderMaterial({vertexShader:'varying vec3 n;varying vec3 v;void main(){n=normalize(normalMatrix*normal);vec4 p=modelViewMatrix*vec4(position,1.0);v=-p.xyz;gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n;varying vec3 v;void main(){float a=pow(0.72-dot(normalize(n),normalize(v)),2.3);gl_FragColor=vec4(0.25,0.57,1.0,a*0.78);}',blending:T.AdditiveBlending,side:T.BackSide,transparent:true,depthWrite:false}));earthGroup.add(glow);
+          const starPositions=[];for(let i=0;i<500;i++){const radius=2.4+Math.random()*5.5,theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);starPositions.push(radius*Math.sin(phi)*Math.cos(theta),radius*Math.cos(phi),radius*Math.sin(phi)*Math.sin(theta));}
+          const starGeometry=new T.BufferGeometry();starGeometry.setAttribute('position',new T.Float32BufferAttribute(starPositions,3));scene.add(new T.Points(starGeometry,new T.PointsMaterial({color:0xd8e6ff,size:.018,transparent:true,opacity:.8,sizeAttenuation:true})));
+          const dotGeometry=new T.SphereGeometry(.023,10,8);
+          const haloGeometry=new T.SphereGeometry(.04,9,7);
+          const dotMaterial=new T.MeshBasicMaterial({color:0xffffff});
+          const haloMaterial=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
+          personPinMesh=new T.InstancedMesh(dotGeometry,dotMaterial,people.length);
+          personHaloMesh=new T.InstancedMesh(haloGeometry,haloMaterial,people.length);
+          const temp=new T.Object3D();
+          people.forEach((person,index)=>{
+            const phi=(90-person.latitude)*Math.PI/180,theta=(person.longitude+180)*Math.PI/180,radius=1.515;
+            const position=new T.Vector3(-radius*Math.sin(phi)*Math.cos(theta),radius*Math.cos(phi),radius*Math.sin(phi)*Math.sin(theta));
+            temp.position.copy(position);temp.updateMatrix();personPinMesh.setMatrixAt(index,temp.matrix);personHaloMesh.setMatrixAt(index,temp.matrix);
+            const personColor=new T.Color(0x76f3ca);personPinMesh.setColorAt(index,personColor);personHaloMesh.setColorAt(index,personColor);
+            markerRecords.push({person,index,position});
+          });
+          personPinMesh.instanceMatrix.needsUpdate=true;personHaloMesh.instanceMatrix.needsUpdate=true;
+          earthGroup.add(personHaloMesh,personPinMesh);
+          const labelCount=innerWidth<760?7:13;
+          for(let index=0;index<labelCount;index+=1){
+            const label=document.createElement('div');label.className='pin-label';label.innerHTML='<span class="pin-rank"></span><span></span>';
+            label.setAttribute('role','button');label.setAttribute('tabindex','0');label.addEventListener('click',()=>{if(label.person)showSelection(label.person);});
+            label.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&label.person){event.preventDefault();showSelection(label.person);}});
+            document.getElementById('globeStage').appendChild(label);topLabels.push(label);
+          }
+          refreshRanking();updateGlobePins();
+          const raycaster=new T.Raycaster(),pointer=new T.Vector2();let drag=false,moved=false,lastX=0,lastY=0,downX=0,downY=0;
+          canvas.addEventListener('pointerdown',event=>{drag=true;moved=false;lastX=downX=event.clientX;lastY=downY=event.clientY;canvas.setPointerCapture(event.pointerId);});
+          canvas.addEventListener('pointermove',event=>{if(!drag)return;const dx=event.clientX-lastX,dy=event.clientY-lastY;if(Math.abs(event.clientX-downX)+Math.abs(event.clientY-downY)>4)moved=true;earthGroup.rotation.y+=dx*.007;earthGroup.rotation.x=Math.max(-.45,Math.min(.45,earthGroup.rotation.x+dy*.005));lastX=event.clientX;lastY=event.clientY;});
+          canvas.addEventListener('pointerup',event=>{if(drag&&!moved){const bounds=canvas.getBoundingClientRect();pointer.set((event.clientX-bounds.left)/bounds.width*2-1,-(event.clientY-bounds.top)/bounds.height*2+1);raycaster.setFromCamera(pointer,camera);earthGroup.updateMatrixWorld(true);const hit=raycaster.intersectObject(personPinMesh,false).find(item=>{const record=markerRecords[item.instanceId];return record&&record.position.clone().applyMatrix4(earthGroup.matrixWorld).z>0;});if(hit&&markerRecords[hit.instanceId])showSelection(markerRecords[hit.instanceId].person);}drag=false;});
+          canvas.addEventListener('pointercancel',()=>{drag=false;});
+          const resize=()=>{const bounds=canvas.getBoundingClientRect();if(!bounds.width||!bounds.height)return;renderer.setSize(bounds.width,bounds.height,false);camera.aspect=bounds.width/bounds.height;if(!camera.userData.zoomed)camera.position.z=bounds.width<450?5.7:5.1;camera.updateProjectionMatrix();};
+          const observer=new ResizeObserver(resize);observer.observe(canvas.parentElement);resize();
+          let last=0;const project=now=>{
+            requestAnimationFrame(project);
+            if(now-last<28)return;last=now;
+            if(!drag)earthGroup.rotation.y+=.00125;
+            earthGroup.updateMatrixWorld(true);renderer.render(scene,camera);
+            const displayed=rankedPeople.slice(0,Math.min(topLabels.length,innerWidth<760?7:13));
+            const projected=[];
+            topLabels.forEach((label,index)=>{
+              const person=displayed[index];if(!person){label.classList.remove('visible');return;}
+              const record=markerRecords[people.indexOf(person)];if(!record){label.classList.remove('visible');return;}
+              label.person=person;label.children[0].textContent=`#${index+1}`;label.children[1].textContent=person.name;
+              label.title=`#${index+1} ${person.name} · ${person.country} · ${person.category}`;
+              label.setAttribute('aria-label',`Rank ${index+1}: ${person.name}, ${person.country}, ${person.category}`);
+              label.classList.toggle('top-three',index<3);
+              const world=record.position.clone().applyMatrix4(earthGroup.matrixWorld);const front=world.z>0.02;
+              const point=world.project(camera);const x=(point.x*.5+.5)*canvas.clientWidth,y=(-point.y*.5+.5)*canvas.clientHeight;
+              const inBounds=x>9&&x<canvas.clientWidth-9&&y>40&&y<canvas.clientHeight-31;
+              label.classList.toggle('visible',front&&inBounds);
+              label.classList.toggle('selected',person===selectedPerson);
+              label.style.left=`${x}px`;label.style.top=`${y}px`;
+              if(front&&inBounds)projected.push({label,x,y,rank:index+1,width:index<3?140:155});
+            });
+            projected.sort((a,b)=>a.rank-b.rank);
+            const accepted=[];projected.forEach(item=>{const collision=accepted.some(other=>Math.abs(item.x-other.x)<(item.width+other.width)*.43&&Math.abs(item.y-other.y)<18);if(collision&&item.rank>3)item.label.classList.remove('visible');else accepted.push(item);});
+            personHaloMesh.material.opacity=.15+(Math.sin(now*.0025)+1)*.035;
+          };
+          requestAnimationFrame(project);
+          globe={renderer,scene,earthGroup,resize,dispose(){observer.disconnect();renderer.dispose();}};
+          document.getElementById('globeLoader').classList.add('hidden');
+        }catch(error){document.getElementById('globeLoader').classList.add('hidden');document.getElementById('globeFallback').hidden=false;}
+      }
+      function updateGlobeLabels(){
+        if(!topLabels.length)return;
+        topLabels.forEach((label,index)=>{const person=rankedPeople[index];if(!person){label.classList.remove('visible');return;}label.person=person;label.children[0].textContent=`#${index+1}`;label.children[1].textContent=person.name;});
+      }
+      function updateGlobePins(){
+        if(!personPinMesh)return;
+        const color=new THREE.Color();
+        markerRecords.forEach(record=>{
+          color.set(record.person.change>.08?0x6bffd0:record.person.change<-.08?0xff7892:0xb6ffe8);
+          personPinMesh.setColorAt(record.index,color);personHaloMesh.setColorAt(record.index,color);
+        });
+        personPinMesh.instanceColor.needsUpdate=true;personHaloMesh.instanceColor.needsUpdate=true;
+        const ranked=[...people].sort((a,b)=>b.price-a.price);
+        for(let index=0;index<Math.min(3,ranked.length);index++){
+          const markerIndex=people.indexOf(ranked[index]);color.set(index===0?0xffd77f:index===1?0xd8e4ff:0xe7a878);
+          personPinMesh.setColorAt(markerIndex,color);personHaloMesh.setColorAt(markerIndex,color);
+        }
+        personPinMesh.instanceColor.needsUpdate=true;personHaloMesh.instanceColor.needsUpdate=true;
+      }
+      document.getElementById('personClose').addEventListener('click',()=>{selectedPerson=null;document.getElementById('selectedPerson').hidden=true;topLabels.forEach(label=>label.classList.remove('selected'));});
+      const donateModal=document.getElementById('donateModal');
+      const closeDonate=()=>{donateModal.hidden=true;document.getElementById('supportOpen').focus();};
+      document.getElementById('supportOpen').addEventListener('click',()=>{donateModal.hidden=false;document.getElementById('donateClose').focus();});
+      document.getElementById('donateClose').addEventListener('click',closeDonate);
+      donateModal.addEventListener('click',event=>{if(event.target===donateModal)closeDonate();});
+      document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!donateModal.hidden)closeDonate();});
+      document.getElementById('copyUpi').addEventListener('click',async()=>{
+        const number=document.getElementById('upiNumber').textContent;
+        try{await navigator.clipboard.writeText(number);}catch(error){const input=document.createElement('textarea');input.value=number;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();document.execCommand('copy');input.remove();}
+        document.getElementById('copyStatus').textContent='Number copied. Thank you!';
+      });
+      seedPrices();makePersonChart();renderAI();createGlobe();
+      window.setInterval(updateSimulation,1900);
+      window.addEventListener('resize',()=>{if(globe)globe.resize();});
+      window.humanOrbit={people,traders,showSelection,updateSimulation,get tick(){return tick;}};
+    })();
+  </script>
+</body>
+</html>
